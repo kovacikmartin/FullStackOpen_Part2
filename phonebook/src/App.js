@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import axios from 'axios';
+import React, { useState, useEffect } from 'react'
 import './App.css';
 
 const Heading = ({text}) => <h2>{text}</h2>
@@ -29,15 +30,21 @@ const Search = ({searchHandle, text}) => <>{text}<input onChange={searchHandle}/
 
 const App = () => {
 
-  const [personsDefault, setPersonsDefault] = useState([
-    { name: 'Arto Hellas',
-      number: '0123456789',
-    }
-  ]) 
-  const [persons, setPersons] = useState([...personsDefault])
+  const [personsDefault, setPersonsDefault] = useState([]) 
+  const [persons, setPersons] = useState([])
 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
+
+  useEffect(() => {
+
+    axios
+      .get("http://localhost:3001/persons")
+      .then(response => {
+        setPersonsDefault(response.data)
+        setPersons(response.data)
+    })
+  }, [])
 
   const addPerson = (event) => {
     event.preventDefault()
