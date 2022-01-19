@@ -1,42 +1,12 @@
-import axios from 'axios';
 import React, { useState, useEffect } from 'react'
 import './App.css';
 import phonebookService from './services/phonebook'
+import Heading from './components/Heading'
+import Phonebook from './components/Phonebook'
+import PhonebookForm from './components/PhonebookForm'
+import Notification from './components/Notification'
+import Search from './components/Search'
 
-const Heading = ({text}) => <h2>{text}</h2>
-
-const PhonebookEntry = ({person, deleteHandle}) => {
-
-  return(
-    <div>
-      <span>{person.name} {person.number}</span>
-      <button type="button" onClick={() => deleteHandle(person.id, person.name)}>delete</button>
-    </div>
-  )
-} 
-
-const Phonebook = ({persons, deleteHandle}) => persons.map(person => 
-                                <PhonebookEntry key={person.number} person={person} deleteHandle={deleteHandle}/> )
-
-const PhonebookForm = ({submitHandle, nameHandle, numberHandle, name, number}) => {
-
-  
-  return(
-    <form onSubmit={submitHandle}>
-        <div>
-          name: <input value={name} onChange={nameHandle}/>
-        </div>
-        <div>
-          number: <input value={number} onChange={numberHandle}/>
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-    </form>
-  )
-}
-
-const Search = ({searchHandle, text}) => <>{text}<input onChange={searchHandle}/></>
 
 const App = () => {
 
@@ -45,6 +15,9 @@ const App = () => {
 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
+
+  const [message, setMessage] = useState('')
+  const [messageType, setMessageType] = useState('')
 
   useEffect(() => {
 
@@ -76,6 +49,14 @@ const App = () => {
 
             setPersonsDefault(personsDefault.map(person => person.name === newName ? newPerson : person))
             setPersons(persons.map(person => person.name === newName ? newPerson : person))
+
+            setMessage(`Number of ${newName} has been changed`)
+            setMessageType('success')
+          })
+          .catch(error => {
+            
+            setMessage(`Information of ${newName} has already been removed from the server`)
+            setMessageType('error')
           })
       }
     }
@@ -89,8 +70,17 @@ const App = () => {
           personObject.id = response.id
           setPersonsDefault(personsDefault.concat(personObject))
           setPersons(persons.concat(personObject))
+
+          setMessage(`Added ${newName}`)
+          setMessageType('success')
         })
     }
+
+    setTimeout(() => {
+          
+      setMessage('')
+      setMessageType('')
+    }, 4000)
 
     setNewName('')
     setNewNumber('')
@@ -127,6 +117,7 @@ const App = () => {
       <Search searchHandle={searchChange} text="search for"/>
 
       <Heading text="Add new entry" />
+      <Notification message={message} type={messageType}/>
       <PhonebookForm submitHandle={addPerson}
                     nameHandle={nameChange}
                     numberHandle={numberChange}
@@ -138,6 +129,5 @@ const App = () => {
     </div>
   )
 }
-
 
 export default App;
