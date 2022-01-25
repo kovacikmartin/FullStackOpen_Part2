@@ -24,6 +24,7 @@ const App = () => {
     phonebookService
       .getAll()
       .then(persons => {
+        
         setPersonsDefault(persons)
         setPersons(persons)
       })
@@ -39,14 +40,15 @@ const App = () => {
       
       if(window.confirm(`${newName} is already in the phonebook. Replace the old number with a new one?`)){
 
-        const newPerson = personsDefault.find(person => person.name === newName)
+        const newPerson = JSON.parse(JSON.stringify(personsDefault.find(person => person.name === newName)))
 
         newPerson.number = newNumber
-
+       
         phonebookService
           .changeNumber(newPerson)
           .then(response => {
 
+            
             setPersonsDefault(personsDefault.map(person => person.name === newName ? newPerson : person))
             setPersons(persons.map(person => person.name === newName ? newPerson : person))
 
@@ -55,18 +57,28 @@ const App = () => {
           })
           .catch(error => {
             
-            setMessage(`Information of ${newName} has already been removed from the server`)
+            const errorMsg = error.response.data.error
+
+            if(errorMsg.includes('Validation')){
+
+              setMessage(errorMsg)
+            }
+            else{
+              setMessage(`Information of ${newName} has already been removed from the server`)
+            }
+            
             setMessageType('error')
           })
       }
     }
     else{
       const personObject = { name: newName, number: newNumber }
-
+      
       phonebookService
         .create(personObject)
         .then(response => {
 
+          
           personObject.id = response.id
           setPersonsDefault(personsDefault.concat(personObject))
           setPersons(persons.concat(personObject))
@@ -76,11 +88,8 @@ const App = () => {
         })
         .catch(error => {
 
-          console.log(error);
-          alert("IN CATCH")
-
-          //alert(error.response.data.message)
-          setMessage(error.response.data.message)
+          
+          setMessage(error.response.data.error)
           setMessageType('error')
         })
     }
