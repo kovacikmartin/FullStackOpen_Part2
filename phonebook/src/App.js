@@ -74,6 +74,15 @@ const App = () => {
           setMessage(`Added ${newName}`)
           setMessageType('success')
         })
+        .catch(error => {
+
+          console.log(error);
+          alert("IN CATCH")
+
+          //alert(error.response.data.message)
+          setMessage(error.response.data.message)
+          setMessageType('error')
+        })
     }
 
     setTimeout(() => {
